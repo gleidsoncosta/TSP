@@ -22,6 +22,8 @@ def main(prng=None, display=False):
                 fitness.append(total)
         return fitness
 
+    #somente ir pro git
+
     #usar isso aqui para alterar oq eu quero ver de dentro da evolução
     #depois somente por
     #ea.observer = my_observer
