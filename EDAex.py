@@ -24,7 +24,7 @@ def main(prng=None, display=False):
 
     #somente ir pro git
 
-    #usar isso aqui para alterar oq eu quero ver de dentro da evolução
+    #usar isso aqui para alterar oq eu quero ver de dentro da evolucao
     #depois somente por
     #ea.observer = my_observer
     def my_observer(population, num_generations, num_evaluations, args):
@@ -37,16 +37,16 @@ def main(prng=None, display=False):
         return num_evaluations >= max_evaluations
 
     #funcao para fazer a variacao de dados
-    #utiliza o gaussian proprio do framework, so tem q ver oq é esse bounder
+    #utiliza o gaussian proprio do framework, so tem q ver oq eh esse bounder
     #inspyred.ec.variators.gaussian_mutation
 
     #funcao para selecionar os meus itens
-    #o metodo de selação é o prorpio do inspyred, ja que querermo selecionar toda a populcao
+    #o metodo de selecao eh o prorpio do inspyred, ja que querermo selecionar toda a populcao
     #inspyred.ec.selectors.default_selection
 
 
     #funcao para recolocador dos itens
-    #o metodo utilizado do proprio inspyred para recolocação ( comma_replacement - seleciona de forma elitista )
+    #o metodo utilizado do proprio inspyred para recolocacao ( comma_replacement - seleciona de forma elitista )
     #inspyred.ec.replacers.comma_replacement
 
 
