@@ -1,6 +1,7 @@
 from random import Random
 from time import time
 import inspyred
+import math
 
 #solucao
 #permutacao
@@ -10,6 +11,12 @@ class Lista(object):
     def __init__(self, index, value):
         self.value = value      #valor na permutação
         self.index = index      #valor na posicao
+        self.negative = False
+        if value >= 0:
+            self.negative = False
+        else:
+            self.negative = True
+            self.value = self.value * (-1)
 
 def main(prng=None, display=False):
 
@@ -65,10 +72,11 @@ def main(prng=None, display=False):
 [25, 55],
 [48, 28],
 [56, 37],
-[30, 40],
+[30, 40]
                ]
     cities_tour = [i for i in range(len(cities))]
-    mine = [1,
+    mine = [
+1,
 22,
 8,
 26,
@@ -118,42 +126,66 @@ def main(prng=None, display=False):
 5,
 38,
 11,
-32]
+32
+            ]
 
     #vai gerar as permutacoes iniciais das cidades
     #editar depois
     def my_generator(random, args):
-        locations = cities_tour
-        random.shuffle(locations)
+        #para fazer o tour, nao excluir
+        #locations = cities_tour
+        #random.shuffle(locations)
 
-        #my_sol = 0
-        #for i in range(0, len(mine)-1):
-        #    my_sol += eu_dist(cities[mine[i]], cities[mine[i+1]])
-        #my_sol += eu_dist(cities[mine[len(mine)-1]], cities[mine[0]])
-
-        #print("minha solucao %s" % my_sol)
+        #um outro modo
+        locations = [random.gauss(0, 1) for i in range(len(cities_tour))]
 
         return locations
 
-    def radixSort(array):
-        result_parcial = [[] for i in range(10)]
-        result_final = []
-
-        #obtem o tamanho máximo de numero de algorismos do maior
-        max = 0
-        for i in range(len(array)):
-            if array[i] > array[max]:
-                max = i
+    def radixSortPlusMinus(array):
+        positivo = []
+        negativo = []
+        real_array = []
 
         #resultado final recebe elementos com objeto index origin e valor
         #valor para ordenar e index para guardar a posição q deve mudar
         for i in range(len(array)):
             elm = Lista(i, array[i])
-            result_final.append(elm)
+            if elm.negative:
+                negativo.append(elm)
+            else:
+                positivo.append(elm)
+
+        if len(negativo) > 0:
+            negativo = radixSort(negativo)
+            for i in range(int(len(negativo)/2)):
+                aux = negativo[i]
+                negativo[i] = negativo[(len(negativo)-1)-i]
+                negativo[(len(negativo)-1)-i] = aux
+        if len(positivo) > 0:
+            positivo = radixSort(positivo)
+
+        real_array = negativo + positivo
+
+        perm = [-1 for i in range(len(array))]
+        for i in range(len(perm)):
+            perm[real_array[i].index] = i
+
+        return perm
+
+
+    def radixSort(array):
+        result_parcial = [[] for i in range(10)]
+        result_final = array
+
+        #obtem o tamanho máximo de numero de algorismos do maior
+        max = 0
+        for i in range(len(array)):
+            if array[i].value > array[max].value:
+                max = i
 
         size = 1
         mod = 10
-        max = array[max]
+        max = array[max].value
         find = False
         while not find:
             if max%mod == max:
@@ -176,23 +208,17 @@ def main(prng=None, display=False):
 
 
             result_final = []
-            pos_res_fin = 0
             for j in range(len(result_parcial)):
                 for k in range(len(result_parcial[j])):
                     result_final.append(result_parcial[j][k])
-                    pos_res_fin = pos_res_fin + 1
 
-        perm = [-1 for i in range(len(array))]
-        for i in range(len(perm)):
-            perm[result_final[i].index] = i
-
-        return perm
+        return result_final
 
     def eu_dist(p1, p2):
-        d = (((p1[0] - p2[0])**2)+((p1[1] - p2[1])**2))**(0.5)
+        val1 = math.pow ((p1[0] - p2[0]), 2)
+        val2 = math.pow ((p1[1] - p2[1]), 2)
+        d = math.sqrt (val1 + val2)
         return d
-
-
 
     #vai avaliar o fitness de cada canditato
     #para q o evol comp faca o servico
@@ -202,19 +228,21 @@ def main(prng=None, display=False):
         fitness = []
         for cand in candidates:
             to_radix_pos = []
-            to_radix_neg = []
             permute = []
             for i in range(len(cand)):
-                #if(cand[i] > 0):
                 to_radix_pos.append(int(cand[i]*100))
-            permute = radixSort(to_radix_pos)
+            permute = radixSortPlusMinus(to_radix_pos)
 
             total = 0
             for i in range(0, len(permute)-1):
-                total += eu_dist(cities[permute[i]], cities[permute[i+1]])
-            total += eu_dist(cities[permute[len(permute)-1]], cities[permute[0]])
-
-            #print(permute)
+                city1 = cities[permute[i]]
+                city2 = cities[permute[i+1]]
+                sol = eu_dist(city1, city2)
+                total = total + sol
+            city1 = cities[permute[len(permute)-1]]
+            city2 = cities[permute[0]]
+            sol = eu_dist(city1, city2)
+            total = total + sol
 
             fitness.append(total)
         return fitness
@@ -255,16 +283,17 @@ def main(prng=None, display=False):
     ea = inspyred.ec.EDA(prng)
 
     ea.observer = my_observer
-    ea.terminator = my_terminator
+    ea.terminator = inspyred.ec.terminators.evaluation_termination
 
-    ea.selector = inspyred.ec.selectors.default_selection
-    ea.variator = inspyred.ec.variators.gaussian_mutation
-    ea.replacer = inspyred.ec.replacers.comma_replacement
+    #ea.selector = inspyred.ec.selectors.default_selection
+    #ea.variator = inspyred.ec.variators.gaussian_mutation
+    #ea.replacer = inspyred.ec.replacers.comma_replacement
 
     final_pop = ea.evolve(evaluator=my_evaluator,
                           generator=my_generator,
                           pop_size=200,
-                          max_evaluations=4000,
+                          maximize=False,
+                          max_evaluations=40000,
                           num_selected=200,
                           num_offspring=400,
                           num_elites=1)
