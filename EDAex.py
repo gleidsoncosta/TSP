@@ -2,25 +2,137 @@ from random import Random
 from time import time
 import inspyred
 
+#solucao
+#permutacao
+#quantas chamadas a funcao objetivo
+
 class Lista(object):
     def __init__(self, index, value):
         self.value = value      #valor na permutação
         self.index = index      #valor na posicao
 
-        #solucao
-        #permutacao
-        #quantas chamadas a funcao objetivo
 def main(prng=None, display=False):
 
 
-    cities = [ [37, 52], [49, 49], [52, 64], [20, 26], [40, 30] ]
+    cities = [
+[37, 52],
+[49, 49],
+[52, 64],
+[20, 26],
+[40, 30],
+[21, 47],
+[17, 63],
+[31, 62],
+[52, 33],
+[51, 21],
+[42, 41],
+[31, 32],
+[5, 25],
+[12, 42],
+[36, 16],
+[52, 41],
+[27, 23],
+[17, 33],
+[13, 13],
+[57, 58],
+[62, 42],
+[42, 57],
+[16, 57],
+[8, 52],
+[7, 38],
+[27, 68],
+[30, 48],
+[43, 67],
+[58, 48],
+[58, 27],
+[37, 69],
+[38, 46],
+[46, 10],
+[61, 33],
+[62, 63],
+[63, 69],
+[32, 22],
+[45, 35],
+[59, 15],
+[5, 6],
+[10, 17],
+[21, 10],
+[5, 64],
+[30, 15],
+[39, 10],
+[32, 39],
+[25, 32],
+[25, 55],
+[48, 28],
+[56, 37],
+[30, 40],
+               ]
     cities_tour = [i for i in range(len(cities))]
+    mine = [1,
+22,
+8,
+26,
+31,
+28,
+3,
+36,
+35,
+20,
+2,
+29,
+21,
+16,
+50,
+34,
+30,
+9,
+49,
+10,
+39,
+33,
+45,
+15,
+44,
+42,
+40,
+19,
+41,
+13,
+25,
+14,
+24,
+43,
+7,
+23,
+48,
+6,
+27,
+51,
+46,
+12,
+47,
+18,
+4,
+17,
+37,
+5,
+38,
+11,
+32]
 
     #vai gerar as permutacoes iniciais das cidades
     #editar depois
     def my_generator(random, args):
         locations = cities_tour
         random.shuffle(locations)
+
+        #my_sol = 0
+        #for i in range(0, len(mine)-1):
+        #    my_sol += eu_dist(cities[mine[i]], cities[mine[i+1]])
+        #my_sol += eu_dist(cities[mine[len(mine)-1]], cities[mine[0]])
+
+        #print("minha solucao %s" % my_sol)
+
         return locations
 
     def radixSort(array):
@@ -76,27 +188,34 @@ def main(prng=None, display=False):
 
         return perm
 
+    def eu_dist(p1, p2):
+        d = (((p1[0] - p2[0])**2)+((p1[1] - p2[1])**2))**(0.5)
+        return d
+
+
+
     #vai avaliar o fitness de cada canditato
     #para q o evol comp faca o servico
     def my_evaluator(candidates, args):
         #primeiro transformar  a lista de reais para uma de inteiros
         #multiplicar os valores por 100 para manter os inteiros reais
-
         fitness = []
-        permute = []
         for cand in candidates:
             to_radix_pos = []
             to_radix_neg = []
+            permute = []
             for i in range(len(cand)):
                 #if(cand[i] > 0):
                 to_radix_pos.append(int(cand[i]*100))
             permute = radixSort(to_radix_pos)
 
-            print(permute)
-
             total = 0
-            for i in range(0, len(permute)):
-                total += permute[i]
+            for i in range(0, len(permute)-1):
+                total += eu_dist(cities[permute[i]], cities[permute[i+1]])
+            total += eu_dist(cities[permute[len(permute)-1]], cities[permute[0]])
+
+            #print(permute)
+
             fitness.append(total)
         return fitness
 
@@ -111,7 +230,7 @@ def main(prng=None, display=False):
 
     #uso para finalizar a busca
     def my_terminator(population, num_generations, num_evaluations, args):
-        max_generations = args.setdefault('max_generations', 1)
+        max_generations = args.setdefault('max_generations', 100)
         return num_generations >= max_generations
 
     #funcao para fazer a variacao de dados
@@ -144,10 +263,10 @@ def main(prng=None, display=False):
 
     final_pop = ea.evolve(evaluator=my_evaluator,
                           generator=my_generator,
-                          pop_size=500,
-                          max_evaluations=15000,
-                          num_selected=500,
-                          num_offspring=500,
+                          pop_size=200,
+                          max_evaluations=4000,
+                          num_selected=200,
+                          num_offspring=400,
                           num_elites=1)
 
 
