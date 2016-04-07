@@ -20,9 +20,11 @@ class Lista(object):
 
 def main(prng=None, display=False):
     cities = []
-    print "Type the filename:"
-    #file_path = "../Eil/eil51.tsp"
-    file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    print ("Type the filename:")
+    #Caminho usado pelo pc de Fernando
+    #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    #Caminho usado pelo pc de Gleidson
+    file_path = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
     # file_name = raw_input("> ")
     file_name = file_path
 
@@ -51,63 +53,6 @@ def main(prng=None, display=False):
         if s.startswith('NODE_COORD_SECTION'):  # a seccao que lista os pontos comeca na prox linha
             points_start = True
 
-<<<<<<< HEAD
-=======
-
-    cities = [
-[37, 52],
-[49, 49],
-[52, 64],
-[20, 26],
-[40, 30],
-[21, 47],
-[17, 63],
-[31, 62],
-[52, 33],
-[51, 21],
-[42, 41],
-[31, 32],
-[5, 25],
-[12, 42],
-[36, 16],
-[52, 41],
-[27, 23],
-[17, 33],
-[13, 13],
-[57, 58],
-[62, 42],
-[42, 57],
-[16, 57],
-[8, 52],
-[7, 38],
-[27, 68],
-[30, 48],
-[43, 67],
-[58, 48],
-[58, 27],
-[37, 69],
-[38, 46],
-[46, 10],
-[61, 33],
-[62, 63],
-[63, 69],
-[32, 22],
-[45, 35],
-[59, 15],
-[5, 6],
-[10, 17],
-[21, 10],
-[5, 64],
-[30, 15],
-[39, 10],
-[32, 39],
-[25, 32],
-[25, 55],
-[48, 28],
-[56, 37],
-[30, 40]
-               ]
->>>>>>> 4eb8952161e25b80bf3af6ef3153c072dd21f9dd
     cities_tour = [i for i in range(len(cities))]
     mine = [
 1,
@@ -216,15 +161,6 @@ def main(prng=None, display=False):
             if array[i].value > array[max].value:
                 max = i
 
-<<<<<<< HEAD
-        #resultado final recebe elementos com objeto index origin e valor
-        #valor para ordenar e index para guardar a posicao q deve mudar
-        for i in range(len(array)):
-            elm = Lista(i, array[i])
-            result_final.append(elm)
-
-=======
->>>>>>> 4eb8952161e25b80bf3af6ef3153c072dd21f9dd
         size = 1
         mod = 10
         max = array[max].value
