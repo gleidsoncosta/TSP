@@ -8,65 +8,42 @@ import inspyred
 
 class Lista(object):
     def __init__(self, index, value):
-        self.value = value      #valor na permutação
+        self.value = value      #valor na permutacao
         self.index = index      #valor na posicao
 
 def main(prng=None, display=False):
+    cities = []
+    print "Type the filename:"
+    #file_path = "../Eil/eil51.tsp"
+    file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    # file_name = raw_input("> ")
+    file_name = file_path
 
+    with open(file_name) as f:
+        lines = f.readlines()
 
-    cities = [
-[37, 52],
-[49, 49],
-[52, 64],
-[20, 26],
-[40, 30],
-[21, 47],
-[17, 63],
-[31, 62],
-[52, 33],
-[51, 21],
-[42, 41],
-[31, 32],
-[5, 25],
-[12, 42],
-[36, 16],
-[52, 41],
-[27, 23],
-[17, 33],
-[13, 13],
-[57, 58],
-[62, 42],
-[42, 57],
-[16, 57],
-[8, 52],
-[7, 38],
-[27, 68],
-[30, 48],
-[43, 67],
-[58, 48],
-[58, 27],
-[37, 69],
-[38, 46],
-[46, 10],
-[61, 33],
-[62, 63],
-[63, 69],
-[32, 22],
-[45, 35],
-[59, 15],
-[5, 6],
-[10, 17],
-[21, 10],
-[5, 64],
-[30, 15],
-[39, 10],
-[32, 39],
-[25, 32],
-[25, 55],
-[48, 28],
-[56, 37],
-[30, 40],
-               ]
+    n_cities = 0
+    for i in range(2, len(lines)):  # Esse for busca o numero de cidades
+        current_line = str(lines[i])
+        if current_line.startswith('DIMENSION :'):
+            str_n_cities = current_line.split(':')[1]  # pega a segunda parte da string
+            while str_n_cities.startswith(' '):  # remove qualquer espaco no comeco
+                str_n_cities = str_n_cities[1: len(str_n_cities)]
+            if str_n_cities.endswith("\\") or str_n_cities.endswith(' '):  # remove qualquer barra ou espaco no final
+                str_n_cities = str_n_cities[0: (len(str_n_cities) - 2)]
+            n_cities = int(str_n_cities)
+            break
+    print(n_cities)
+    points_start = False  # armazena se a seccao que lista os pontos comecou
+    for j in range(i + 1, (len(lines) - 1)):  # esse for busca os pontos
+        s = str(lines[j])
+        if points_start and not (s.startswith('EOF')):
+            xCoord = float(s.split(" ")[1])
+            yCoord = float(s.split(" ")[2])
+            cities.append([xCoord, yCoord])
+        if s.startswith('NODE_COORD_SECTION'):  # a seccao que lista os pontos comeca na prox linha
+            points_start = True
+
     cities_tour = [i for i in range(len(cities))]
     mine = [1,
 22,
@@ -139,14 +116,14 @@ def main(prng=None, display=False):
         result_parcial = [[] for i in range(10)]
         result_final = []
 
-        #obtem o tamanho máximo de numero de algorismos do maior
+        #obtem o tamanho maximo de numero de algorismos do maior
         max = 0
         for i in range(len(array)):
             if array[i] > array[max]:
                 max = i
 
         #resultado final recebe elementos com objeto index origin e valor
-        #valor para ordenar e index para guardar a posição q deve mudar
+        #valor para ordenar e index para guardar a posicao q deve mudar
         for i in range(len(array)):
             elm = Lista(i, array[i])
             result_final.append(elm)
