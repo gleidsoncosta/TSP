@@ -1,7 +1,10 @@
 from random import Random
-from time import time
+import time
 import inspyred
 import math
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 #solucao
 #permutacao
@@ -17,6 +20,7 @@ class Lista(object):
         else:
             self.negative = True
             self.value = self.value * (-1)
+
 
 def main(prng=None, display=False):
     cities = []
@@ -53,60 +57,14 @@ def main(prng=None, display=False):
         if s.startswith('NODE_COORD_SECTION'):  # a seccao que lista os pontos comeca na prox linha
             points_start = True
 
-    cities_tour = [i for i in range(len(cities))]
-    mine = [
-1,
-22,
-8,
-26,
-31,
-28,
-3,
-36,
-35,
-20,
-2,
-29,
-21,
-16,
-50,
-34,
-30,
-9,
-49,
-10,
-39,
-33,
-45,
-15,
-44,
-42,
-40,
-19,
-41,
-13,
-25,
-14,
-24,
-43,
-7,
-23,
-48,
-6,
-27,
-51,
-46,
-12,
-47,
-18,
-4,
-17,
-37,
-5,
-38,
-11,
-32
-            ]
+    cities_tour = [i for i in range(51)]
+    list_of_Xs = [[]]
+    list_of_Ys = [[]]
+    cities_choosen_x = []
+    cities_choosen_y = []
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1,1,1)
 
     #vai gerar as permutacoes iniciais das cidades
     #editar depois
@@ -125,7 +83,7 @@ def main(prng=None, display=False):
         real_array = []
 
         #resultado final recebe elementos com objeto index origin e valor
-        #valor para ordenar e index para guardar a posição q deve mudar
+        #valor para ordenar e index para guardar a posicao q deve mudar
         for i in range(len(array)):
             elm = Lista(i, array[i])
             if elm.negative:
@@ -235,9 +193,78 @@ def main(prng=None, display=False):
         print("gen: %s fit: %s cand: %s prop: %s" % (num_generations, best.fitness, str(best.candidate), len(population)))
 
     #uso para finalizar a busca
-    #def my_variator(random, candidates, args):
-    #    max_generations = args.setdefault('max_generations', 100)
-    #    return num_generations >= max_generations
+    def my_variator1(random, candidates, args):
+        num_offspring = args.setdefault('num_offspring', 1)
+        mut_rate = args.setdefault('mutation_rate', 0.1)
+
+        num_genes = max([len(x) for x in candidates])
+        genes = [[x[i] for x in candidates] for i in range(num_genes)]
+        mean = [float(sum(x)) / float(len(x)) for x in genes]
+
+        #stev
+        stdev = []
+        for g, m in zip(genes, mean):
+            som = 0
+            for x in g:
+                som = som + ((x - m)**2)
+            som = som/len(g)
+            som = math.sqrt(som)
+            stdev.append(som)
+
+        mutants = []
+
+        for i, cs in enumerate(candidates):
+            mutant = copy.copy(cs)
+            for j, (m, s) in enumerate(zip(mean, stdev)):
+                if random.random() < mut_rate:
+                        mutant[j] += random.gauss(m, s)
+            mutants.append(mutant)
+        return mutants
+
+    def my_variator2(random, candidates, args):
+        num_offspring = args.setdefault('num_offspring', 1)
+
+        num_genes = max([len(x) for x in candidates])
+        genes = [[x[i] for x in candidates] for i in range(num_genes)]
+        mean = [float(sum(x)) / float(len(x)) for x in genes]
+
+        #stev
+        stdev = []
+        for g, m in zip(genes, mean):
+            som = 0
+            for x in g:
+                som = som + ((x - m)**2)
+            som = som/len(g)
+            som = math.sqrt(som)
+            stdev.append(som)
+
+        offspring = []
+        for i in range(num_offspring):
+            child = copy.copy(candidates[0])
+            for i, (m, s) in enumerate(zip(mean, stdev)):
+                child[i] = random.gauss(m, s)
+            #child = bounder(child, args)
+            offspring.append(child)
+        return offspring
+
+    def my_variator3(random, candidates, args):
+        mutants = []
+        for i, cs in enumerate(candidates):
+
+            mut_rate = args.setdefault('mutation_rate', 0.1)
+            mean = args.setdefault('gaussian_mean', 0.0)
+            stdev = args.setdefault('gaussian_stdev', 1.0)
+        #    bounder = args['_ec'].bounder
+            mutant = copy.copy(cs)
+
+            for j, m in enumerate(mutant):
+                if random.random() < mut_rate:
+                    mutant[j] += random.gauss(mean, stdev)
+        #    mutant = bounder(mutant, args)
+
+            mutants.append(mutant)
+        return mutants
+        #inspyred_mutator.single_mutation = mutate
 
     #funcao para fazer a variacao de dados
     #utiliza o gaussian proprio do framework, so tem q ver oq eh esse bounder
@@ -252,11 +279,13 @@ def main(prng=None, display=False):
     #o metodo utilizado do proprio inspyred para recolocacao ( comma_replacement - seleciona de forma elitista )
     #inspyred.ec.replacers.comma_replacement
 
+    def list_of_answer(perm):
+        permute = radixSortPlusMinus(perm)
 
 
     if prng is None:
         prng = Random()
-        prng.seed(time())
+        prng.seed(time.time())
 
     ea = inspyred.ec.EDA(prng)
 
@@ -264,21 +293,48 @@ def main(prng=None, display=False):
     ea.terminator = inspyred.ec.terminators.evaluation_termination
 
     #ea.selector = inspyred.ec.selectors.default_selection
+
+    #ea.variator = my_variator1
+    #ea.variator = my_variator2
+    #ea.variator = my_variator3
     ea.variator = inspyred.ec.variators.gaussian_mutation
+
     #ea.replacer = inspyred.ec.replacers.comma_replacement
+
+    #final_pop = ea.evolve(evaluator=my_evaluator,
+    #                      generator=my_generator,
+    #                      pop_size=100,
+    #                      maximize=False,
+    #                      #bounder=inspyred.ec.Bounder(0, 1),
+    #                      max_evaluations=200000,
+    #                      num_selected=100,
+    #                      num_offspring=100,
+    #                      num_elites=75)
 
     final_pop = ea.evolve(evaluator=my_evaluator,
                           generator=my_generator,
-                          pop_size=200,
+                          pop_size=100,
                           maximize=False,
-                          max_evaluations=100000,
-                          num_selected=200,
-                          num_offspring=200,
-                          num_elites=200)
+                          #bounder=inspyred.ec.Bounder(0, 1),
+                          max_evaluations=2000,
+                          num_selected=100,
+                          num_offspring=100,
+                          num_elites=75)
 
 
     if display:
         best = max(final_pop)
+        permute = best.candidate
+        permute = radixSortPlusMinus(permute)
+        for i in range(len(permute)):
+            cities_choosen_x.append(cities[permute[i]][0])
+            cities_choosen_y.append(cities[permute[i]][1])
+
+        ani = animation.FuncAnimation(fig, animate, interval=1000)
+        plt.show()
+
+
+
         print('hihi Best Solution: \n{0}'.format(str(best)))
     return ea
 
