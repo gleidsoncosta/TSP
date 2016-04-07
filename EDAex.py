@@ -291,12 +291,13 @@ def main(prng=None, display=False):
 
     final_pop = ea.evolve(evaluator=my_evaluator,
                           generator=my_generator,
-                          pop_size=200,
+                          pop_size=500,
+                          bounder=inspyred.ec.Bounder(-5, 5),
                           maximize=False,
                           max_evaluations=40000,
-                          num_selected=200,
-                          num_offspring=400,
-                          num_elites=1)
+                          num_selected=500,
+                          num_offspring=500,
+                          num_elites=100)
 
 
     if display:
