@@ -138,7 +138,6 @@ def main(prng=None, display=False):
 
         #um outro modo
         locations = [random.gauss(0, 1) for i in range(len(cities_tour))]
-
         return locations
 
     def radixSortPlusMinus(array):
@@ -291,12 +290,12 @@ def main(prng=None, display=False):
 
     final_pop = ea.evolve(evaluator=my_evaluator,
                           generator=my_generator,
-                          pop_size=100,
+                          pop_size=200,
                           maximize=False,
-                          max_evaluations=60000,
-                          num_selected=100,
-                          num_offspring=50,
-                          num_elites=50)
+                          max_evaluations=100000,
+                          num_selected=200,
+                          num_offspring=200,
+                          num_elites=200)
 
 
     if display:
