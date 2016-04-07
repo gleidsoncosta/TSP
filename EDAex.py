@@ -57,11 +57,8 @@ def main(prng=None, display=False):
         if s.startswith('NODE_COORD_SECTION'):  # a seccao que lista os pontos comeca na prox linha
             points_start = True
 
-    cities_tour = [i for i in range(51)]
-    list_of_Xs = [[]]
-    list_of_Ys = [[]]
-    cities_choosen_x = []
-    cities_choosen_y = []
+    cities_tour = [i for i in range(20)]
+    list_of_best_city = []
 
     fig = plt.figure()
     ax1 = fig.add_subplot(1,1,1)
@@ -166,7 +163,7 @@ def main(prng=None, display=False):
             to_radix_pos = []
             permute = []
             for i in range(len(cand)):
-                to_radix_pos.append(int(cand[i]*100))
+                to_radix_pos.append(int(cand[i]*10000))
             permute = radixSortPlusMinus(to_radix_pos)
 
             total = 0
@@ -190,6 +187,7 @@ def main(prng=None, display=False):
     #ea.observer = my_observer
     def my_observer(population, num_generations, num_evaluations, args):
         best = max(population)
+        list_of_best_city.append(best.candidate)
         print("gen: %s fit: %s cand: %s prop: %s" % (num_generations, best.fitness, str(best.candidate), len(population)))
 
     #uso para finalizar a busca
@@ -282,6 +280,24 @@ def main(prng=None, display=False):
     def list_of_answer(perm):
         permute = radixSortPlusMinus(perm)
 
+    def animate(i):
+        xar = []
+        yar = []
+        # for i in range(len(list_of_best_city)):
+        if(i < len(list_of_best_city)):
+            #st = "Rota  "+list_of_best_city[i]
+            #fig.suptitle(st, fontsize=14, fontweight='bold')
+            permute = radixSortPlusMinus(list_of_best_city[i])
+        else:
+            #st = "Rota  "+list_of_best_city[i]
+            permute = radixSortPlusMinus(list_of_best_city[len(list_of_best_city)-1])
+        for j in range(len(permute)):
+            xar.append(cities[permute[j]][0])
+            yar.append(cities[permute[j]][1])
+        xar.append(cities[permute[0]][0])
+        yar.append(cities[permute[0]][1])
+        ax1.clear()
+        ax1.plot(xar,yar)
 
     if prng is None:
         prng = Random()
@@ -316,7 +332,7 @@ def main(prng=None, display=False):
                           pop_size=100,
                           maximize=False,
                           #bounder=inspyred.ec.Bounder(0, 1),
-                          max_evaluations=2000,
+                          max_evaluations=100000,
                           num_selected=100,
                           num_offspring=100,
                           num_elites=75)
@@ -325,15 +341,20 @@ def main(prng=None, display=False):
     if display:
         best = max(final_pop)
         permute = best.candidate
-        permute = radixSortPlusMinus(permute)
-        for i in range(len(permute)):
-            cities_choosen_x.append(cities[permute[i]][0])
-            cities_choosen_y.append(cities[permute[i]][1])
-
-        ani = animation.FuncAnimation(fig, animate, interval=1000)
+        list_of_best_city.append(permute)
+        ani = animation.FuncAnimation(fig, animate, interval=100)
         plt.show()
 
-
+        xar = []
+        yar = []
+        permute = radixSortPlusMinus(permute)
+        for j in range(len(permute)):
+            xar.append(cities[permute[j]][0])
+            yar.append(cities[permute[j]][1])
+        xar.append(cities[permute[0]][0])
+        yar.append(cities[permute[0]][1])
+        ax1.plot(xar,yar)
+        plt.show()
 
         print('hihi Best Solution: \n{0}'.format(str(best)))
     return ea
