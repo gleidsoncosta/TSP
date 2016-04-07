@@ -235,11 +235,11 @@ def main(prng=None, display=False):
 
             total = 0
             for i in range(0, len(permute)-1):
-                city1 = cities[permute[i]]
-                city2 = cities[permute[i+1]]
+                city1 = cities[permute[i]-1]
+                city2 = cities[permute[i+1]-1]
                 sol = eu_dist(city1, city2)
                 total = total + sol
-            city1 = cities[permute[len(permute)-1]]
+            city1 = cities[permute[len(permute)-1]-1]
             city2 = cities[permute[0]]
             sol = eu_dist(city1, city2)
             total = total + sol
@@ -257,9 +257,9 @@ def main(prng=None, display=False):
         print("gen: %s fit: %s cand: %s prop: %s" % (num_generations, best.fitness, str(best.candidate), len(population)))
 
     #uso para finalizar a busca
-    def my_terminator(population, num_generations, num_evaluations, args):
-        max_generations = args.setdefault('max_generations', 100)
-        return num_generations >= max_generations
+    #def my_variator(random, candidates, args):
+    #    max_generations = args.setdefault('max_generations', 100)
+    #    return num_generations >= max_generations
 
     #funcao para fazer a variacao de dados
     #utiliza o gaussian proprio do framework, so tem q ver oq eh esse bounder
@@ -286,18 +286,17 @@ def main(prng=None, display=False):
     ea.terminator = inspyred.ec.terminators.evaluation_termination
 
     #ea.selector = inspyred.ec.selectors.default_selection
-    #ea.variator = inspyred.ec.variators.gaussian_mutation
+    ea.variator = inspyred.ec.variators.gaussian_mutation
     #ea.replacer = inspyred.ec.replacers.comma_replacement
 
     final_pop = ea.evolve(evaluator=my_evaluator,
                           generator=my_generator,
-                          pop_size=500,
-                          bounder=inspyred.ec.Bounder(-5, 5),
+                          pop_size=100,
                           maximize=False,
-                          max_evaluations=40000,
-                          num_selected=500,
-                          num_offspring=500,
-                          num_elites=100)
+                          max_evaluations=60000,
+                          num_selected=100,
+                          num_offspring=50,
+                          num_elites=50)
 
 
     if display:
