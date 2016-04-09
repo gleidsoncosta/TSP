@@ -4,6 +4,7 @@ import inspyred
 import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import copy
 
 
 #solucao
@@ -28,8 +29,7 @@ def main(prng=None, display=False):
     #Caminho usado pelo pc de Fernando
     #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
     #Caminho usado pelo pc de Gleidson
-    file_path = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
-    # file_name = raw_input("> ")
+    file_path = "/Users/gmend/Documents/Dev/TSP/Eil/alex16.tsp"
     file_name = file_path
 
     with open(file_name) as f:
@@ -42,7 +42,7 @@ def main(prng=None, display=False):
             n_cities = int(current_line.split(':')[1])  # pega a segunda parte da string
 
             break
-    print(n_cities)
+
     points_start = False  # armazena se a seccao que lista os pontos comecou
     for j in range(i + 1, (len(lines) - 1)):  # esse for busca os pontos
         s = str(lines[j])
@@ -53,38 +53,13 @@ def main(prng=None, display=False):
         if s.startswith('NODE_COORD_SECTION'):  # a seccao que lista os pontos comeca na prox linha
             points_start = True
 
-    cities = [
-
-        [1000, 1000],
-[1000, 3000],
-[1000, 5000],
-[2000, 6000],
-[4000, 6000],
-[6000, 6000],
-[6000, 4000],
-[6000, 2000],
-[5000, 1000],
-[3000, 1000]
-
-    ]
-
     cities_tour = [i for i in range(len(cities))]
     list_of_best_city = []
     fit_over_gen = []
+    is_lobat_problem = True
 
     fig = plt.figure()
     ax1 = fig.add_subplot(1,1,1)
-
-    #vai gerar as permutacoes iniciais das cidades
-    #editar depois
-    def my_generator(random, args):
-        #para fazer o tour, nao excluir
-        #locations = cities_tour
-        #random.shuffle(locations)
-
-        #um outro modo
-        locations = [random.gauss(0, 1) for i in range(len(cities_tour))]
-        return locations
 
     def radixSortPlusMinus(array):
         positivo = []
@@ -165,11 +140,63 @@ def main(prng=None, display=False):
         d = math.sqrt (val1 + val2)
         return d
 
+    def calcDistancia(permute):
+        total = 0
+        for i in range(0, len(permute)-1):
+            index1 = permute[i]-1#-1
+            index2 = permute[i+1]-1
+            city1 = cities[index1]
+            city2 = cities[index2]
+            sol = eu_dist(city1, city2)
+            if is_lobat_problem:
+                if (index1)%2 == 0 and (index2)%2 == 0:
+                    sol = sol/2
+            total = total + sol
+        city1 = cities[permute[len(permute)-1]-1]
+        city2 = cities[permute[0]]
+        sol = eu_dist(city1, city2)
+        if is_lobat_problem:
+            if (index1)%2 == 0 and (index2)%2 == 0:
+                sol = sol/2
+        total = total + sol
+        return total
+
+    def animate(i):
+        xar = []
+        yar = []
+        # for i in range(len(list_of_best_city)):
+        if(i < len(list_of_best_city)):
+            permute = radixSortPlusMinus(list_of_best_city[i])
+            st = "Rota %s "% permute
+            st2 = "Fitness %s"% calcDistancia(permute)
+            fig.suptitle(st, fontsize=19, fontweight='bold')
+            ax1.set_title(st2)
+        else:
+            permute = radixSortPlusMinus(list_of_best_city[len(list_of_best_city)-1])
+            st = "Rota %s "% permute
+            st2 = "Fitness %s"% calcDistancia(permute)
+            fig.suptitle(st, fontsize=19, fontweight='bold')
+            ax1.set_title(st2)
+        for j in range(len(permute)):
+            xar.append(cities[permute[j]][0])
+            yar.append(cities[permute[j]][1])
+        xar.append(cities[permute[0]][0])
+        yar.append(cities[permute[0]][1])
+
+        ax1.clear()
+        ax1.plot(xar,yar)
+
+    #vai gerar as permutacoes iniciais das cidades
+    def my_generator(random, args):
+        locations = [random.gauss(0, 1) for i in range(len(cities_tour))]
+        return locations
+
     #vai avaliar o fitness de cada canditato
     #para q o evol comp faca o servico
     def my_evaluator1(candidates, args):
         #primeiro transformar  a lista de reais para uma de inteiros
-        #multiplicar os valores por 100 para manter os inteiros reais
+        #multiplicar os valores por 100 para manter os reais em inteiros
+        #quanto maior a multiplicacao maior a classificacao
         fitness = []
         for cand in candidates:
             to_radix_pos = []
@@ -183,24 +210,7 @@ def main(prng=None, display=False):
             fitness.append(total)
         return fitness
 
-    #vai avaliar o fitness de cada canditato
-    #para q o evol comp faca o servico
-    def my_evaluator2(candidates, args):
-        #primeiro transformar  a lista de reais para uma de inteiros
-        #multiplicar os valores por 100 para manter os inteiros reais
-        fitness = []
-        for cand in candidates:
-            to_radix_pos = []
-            permute = []
-            for i in range(len(cand)):
-                to_radix_pos.append(int(cand[i]*10000))
-            permute = radixSortPlusMinus(to_radix_pos)
-
-            total = calcDistancia(permute)
-
-            fitness.append(total)
-        return fitness
-
+    #causa de termino do programa
     def cause_to_termination(population, num_generations, num_evaluations, args):
         finish = False
         best = max(population)
@@ -214,41 +224,7 @@ def main(prng=None, display=False):
 
         return False
 
-    def calcDistancia(permute):
-        total = 0
-        for i in range(0, len(permute)-1):
-            city1 = cities[permute[i]-1]
-            city2 = cities[permute[i+1]-1]
-            sol = eu_dist(city1, city2)
-            total = total + sol
-        city1 = cities[permute[len(permute)-1]-1]
-        city2 = cities[permute[0]]
-        sol = eu_dist(city1, city2)
-        total = total + sol
-        return total
-
-    def calcDistancia2(permute):
-        total = 0
-        for i in range(0, len(permute)-1):
-            index1 = permute[i]-1#-1
-            index2 = permute[i+1]-1
-            city1 = cities[index1]
-            city2 = cities[index2]
-            if (index1)%2 == 0 and (index2)%2 == 0:
-                sol = eu_dist(city1, city2)/2
-            else:
-                sol = eu_dist(city1, city2)
-            total = total + sol
-        city1 = cities[permute[len(permute)-1]-1]
-        city2 = cities[permute[0]]
-        sol = eu_dist(city1, city2)
-        total = total + sol
-        return total
-    #somente ir pro git
-
     #usar isso aqui para alterar oq eu quero ver de dentro da evolucao
-    #depois somente por
-    #ea.observer = my_observer
     def my_observer(population, num_generations, num_evaluations, args):
         best = max(population)
         list_of_best_city.append(best.candidate)
@@ -327,34 +303,6 @@ def main(prng=None, display=False):
 
             mutants.append(mutant)
         return mutants
-
-    def list_of_answer(perm):
-        permute = radixSortPlusMinus(perm)
-
-    def animate(i):
-        xar = []
-        yar = []
-        # for i in range(len(list_of_best_city)):
-        if(i < len(list_of_best_city)):
-            permute = radixSortPlusMinus(list_of_best_city[i])
-            st = "Rota %s "% permute
-            st2 = "Fitness %s"% calcDistancia(permute)
-            fig.suptitle(st, fontsize=19, fontweight='bold')
-            ax1.set_title(st2)
-        else:
-            permute = radixSortPlusMinus(list_of_best_city[len(list_of_best_city)-1])
-            st = "Rota %s "% permute
-            st2 = "Fitness %s"% calcDistancia(permute)
-            fig.suptitle(st, fontsize=19, fontweight='bold')
-            ax1.set_title(st2)
-        for j in range(len(permute)):
-            xar.append(cities[permute[j]][0])
-            yar.append(cities[permute[j]][1])
-        xar.append(cities[permute[0]][0])
-        yar.append(cities[permute[0]][1])
-
-        ax1.clear()
-        ax1.plot(xar,yar)
 
     if prng is None:
         prng = Random()
