@@ -38,13 +38,9 @@ def main(prng=None, display=False):
     n_cities = 0
     for i in range(2, len(lines)):  # Esse for busca o numero de cidades
         current_line = str(lines[i])
-        if current_line.startswith('DIMENSION :'):
-            str_n_cities = current_line.split(':')[1]  # pega a segunda parte da string
-            while str_n_cities.startswith(' '):  # remove qualquer espaco no comeco
-                str_n_cities = str_n_cities[1: len(str_n_cities)]
-            if str_n_cities.endswith("\\") or str_n_cities.endswith(' '):  # remove qualquer barra ou espaco no final
-                str_n_cities = str_n_cities[0: (len(str_n_cities) - 2)]
-            n_cities = int(str_n_cities)
+        if current_line.startswith('DIMENSION'):
+            n_cities = int(current_line.split(':')[1])  # pega a segunda parte da string
+
             break
     print(n_cities)
     points_start = False  # armazena se a seccao que lista os pontos comecou
