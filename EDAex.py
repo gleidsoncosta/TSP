@@ -23,13 +23,8 @@ class Lista(object):
             self.value = self.value * (-1)
 
 
-def main(prng=None, display=False):
+def main(prng=None, display=False, file_path=None, make_lobat_problem=False, show_graphics=False):
     cities = []
-    print ("Type the filename:")
-    #Caminho usado pelo pc de Fernando
-    #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
-    #Caminho usado pelo pc de Gleidson
-    file_path = "/Users/gmend/Documents/Dev/TSP/Eil/alex16.tsp"
     file_name = file_path
 
     with open(file_name) as f:
@@ -56,7 +51,7 @@ def main(prng=None, display=False):
     cities_tour = [i for i in range(len(cities))]
     list_of_best_city = []
     fit_over_gen = []
-    is_lobat_problem = True
+    is_lobat_problem = make_lobat_problem
 
     fig = plt.figure()
     ax1 = fig.add_subplot(1,1,1)
@@ -337,38 +332,54 @@ def main(prng=None, display=False):
     if display:
         best = max(final_pop)
         permute = best.candidate
-        list_of_best_city.append(permute)
-        ani = animation.FuncAnimation(fig, animate, interval=100)
-        plt.show()
+        print('Fitness: %s' % best.fitness)
+        print('Best Distruibuition %s'% permute)
+        print('Best Permutation %s'%radixSortPlusMinus(permute))
+        if show_graphics:
+            list_of_best_city.append(permute)
+            ani = animation.FuncAnimation(fig, animate, interval=100)
+            plt.show()
 
-        ani = []
+            ani = []
 
-        fig = plt.figure()
-        ax1 = fig.add_subplot(1,1,1)
-        xar = []
-        yar = []
-        permute = radixSortPlusMinus(permute)
-        for j in range(len(permute)):
-            xar.append(cities[permute[j]][0])
-            yar.append(cities[permute[j]][1])
-        xar.append(cities[permute[0]][0])
-        yar.append(cities[permute[0]][1])
-        ax1.plot(xar,yar)
-        plt.show()
+            fig = plt.figure()
+            ax1 = fig.add_subplot(1,1,1)
+            xar = []
+            yar = []
+            trans_permute = radixSortPlusMinus(permute)
+            for j in range(len(trans_permute)):
+                xar.append(cities[trans_permute[j]][0])
+                yar.append(cities[trans_permute[j]][1])
+            xar.append(cities[trans_permute[0]][0])
+            yar.append(cities[trans_permute[0]][1])
+            ax1.plot(xar,yar)
+            plt.show()
 
-        fig = plt.figure()
-        ax1 = fig.add_subplot(1,1,1)
-        xar = []
-        yar = []
-        for j in range(len(fit_over_gen)):
-            xar.append(j)
-            yar.append(fit_over_gen[j])
-        ax1.plot(xar,yar)
-        plt.show()
-
-        print('Fitness: %s Best Solution %s:' % (best.fitness, str(permute)))
-        print(radixSortPlusMinus(permute))
-    return ea
+            fig = plt.figure()
+            ax1 = fig.add_subplot(1,1,1)
+            xar = []
+            yar = []
+            for j in range(len(fit_over_gen)):
+                xar.append(j)
+                yar.append(fit_over_gen[j])
+            ax1.plot(xar,yar)
+            plt.show()
+    return best.fitness, fit_over_gen, permute, radixSortPlusMinus(permute), ea.num_evaluations, ea.num_generations
 
 if __name__ == '__main__':
-    main(display=True)
+    #Caminho usado pelo pc de Fernando
+    #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    #Caminho usado pelo pc de Gleidson
+    file = "/Users/gmend/Documents/Dev/TSP/Eil/alex10.tsp"
+
+    lobat_problem = False
+    is_graphics_on = False
+    fitness, all_fitness, distribuition, permutation, evaluations, generations = \
+        main(display=True, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
+
+    print(fitness)
+    print(all_fitness)
+    print(distribuition)
+    print(permutation)
+    print(evaluations)
+    print(generations)
