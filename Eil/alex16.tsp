@@ -1,0 +1,23 @@
+NAME: ALEX16
+TYPE: TSP
+COMMENT: 16-city problem ALEXANDRE 
+DIMENSION:  16
+EDGE_WEIGHT_TYPE : EUC_2D
+NODE_COORD_SECTION
+1 40 10
+2 10 40
+3 40 40    
+4 20 20    
+5 30 30    
+6 10 10    
+7 30 10    
+8 20 40    
+9 40 20     
+10 10 30    
+11 20 10    
+12 20 30    
+13 30 20      
+14 30 40      
+15 10 20    
+16 40 30     
+EOF
