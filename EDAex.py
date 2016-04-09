@@ -11,6 +11,10 @@ import copy
 #permutacao
 #quantas chamadas a funcao objetivo
 
+stop = 150
+cur_stop = 0
+record = 0
+
 class Lista(object):
     def __init__(self, index, value):
         self.value = value      #valor na permutacao
@@ -26,6 +30,19 @@ class Lista(object):
 def main(prng=None, display=False, file_path=None, make_lobat_problem=False, show_graphics=False):
     cities = []
     file_name = file_path
+
+    def setCurStop():
+        global cur_stop
+        cur_stop = cur_stop + 1
+
+    def resetCurStop():
+        global cur_stop
+        cur_stop = 0
+
+    def setRecord(value):
+        global record
+        record = value
+
 
     with open(file_name) as f:
         lines = f.readlines()
@@ -211,6 +228,15 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
         best = max(population)
         max_evaluations = args.setdefault('max_evaluations', len(population))
 
+        if best.fitness == record:
+            if cur_stop == stop:
+                finish = True
+            else:
+                setCurStop()
+        else:
+            setRecord(best.fitness)
+            resetCurStop()
+
         if num_evaluations >= max_evaluations:
             finish = True
 
@@ -221,8 +247,11 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
     #usar isso aqui para alterar oq eu quero ver de dentro da evolucao
     def my_observer(population, num_generations, num_evaluations, args):
+        global cur_stop
+
         best = max(population)
         list_of_best_city.append(best.candidate)
+
         fit_over_gen.append(best.fitness)
         print("gen: %s fit: %s evaluation: %s prop: %s" % (num_generations, best.fitness, num_evaluations, len(population)))
 
@@ -370,7 +399,7 @@ if __name__ == '__main__':
     #Caminho usado pelo pc de Fernando
     #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
     #Caminho usado pelo pc de Gleidson
-    file = "/Users/gmend/Documents/Dev/TSP/Eil/alex10.tsp"
+    file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
 
     lobat_problem = False
     is_graphics_on = False
