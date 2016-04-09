@@ -5,6 +5,7 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import copy
+import time
 
 #solucao
 #permutacao
@@ -398,7 +399,7 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
 if __name__ == '__main__':
     #Caminho usado pelo pc de Fernando
-    file = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    file = "/Users/Fenando/GitHub/TSP/Eil/alex10.tsp"
     #Caminho usado pelo pc de Gleidson
     #file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
 
@@ -407,6 +408,38 @@ if __name__ == '__main__':
     fitness_history = []
     permutation_history = []
     evaluations_history = []
+    generations_history = []
+    exec_time_history = []
+    inicial_time = time.time()
+
+
+    def somar(valores):
+        soma = 0
+        for v in valores:
+            soma += v
+        return soma
+
+
+    def media(valores):
+        soma = somar(valores)
+        qtd_elementos = len(valores)
+        media = soma / float(qtd_elementos)
+        return media
+
+
+    def variancia(valores):
+        _media = media(valores)
+        soma = 0
+        _variancia = 0
+
+        for valor in valores:
+            soma += math.pow((valor - _media), 2)
+        _variancia = soma / float(len(valores))
+        return _variancia
+
+
+    def desvio_padrao(valores):
+        return math.sqrt(variancia(valores))
 
     for i in range(3):  # executa 30 vezes
         print "Execucao " + str(i+1) + "..."
@@ -420,14 +453,29 @@ if __name__ == '__main__':
         print(evaluations)
         print(generations)
         '''
-        print("Fitness: "+str(int(fitness))+", Numero de avaliacoes: "+str(evaluations)+", Numero de geracoes: "+str(generations))
+
+        exec_time = time.time()-inicial_time
+
+        print("Fitness: "+str(int(fitness))+", Numero de avaliacoes: "+str(evaluations)+", Numero de geracoes: "+str(generations)+", Tempo de execucao: "+str(exec_time))
 
 
         fitness_history.append(int(fitness))
+        permutation_history.append(permutation)
+        evaluations_history.append(evaluations)
+        generations_history.append(generations)
+        exec_time_history.append(exec_time)
 
+    print("\n\n Fitness:")
+    print("Melhor: "+str(min(fitness_history))+", Pior: "+str(max(fitness_history))+", Media: "+str(media(fitness_history))+", Desvio Padrao: "+ str(desvio_padrao(fitness_history)))
+
+    print("\n\n Tempo de execucao:")
+    print("Media: " + str(media(exec_time_history)))
+
+    print("\n\n Validacoes:")
+    print("Media: " + str(media(evaluations_history)))
 
     plt.hist(fitness_history)
-    plt.title("Fitness History")
+    plt.title("Fitness Histogram")
     plt.xlabel("Fitness")
     plt.ylabel("Frequency")
     plt.show()
