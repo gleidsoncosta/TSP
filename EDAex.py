@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import copy
 
-
 #solucao
 #permutacao
 #quantas chamadas a funcao objetivo
@@ -69,9 +68,10 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
     list_of_best_city = []
     fit_over_gen = []
     is_lobat_problem = make_lobat_problem
-
+    '''#Comentar trecho para evitar criacao de janelas durante a execucao de multiplos testes
     fig = plt.figure()
     ax1 = fig.add_subplot(1,1,1)
+    '''
 
     def radixSortPlusMinus(array):
         positivo = []
@@ -247,6 +247,7 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
     #usar isso aqui para alterar oq eu quero ver de dentro da evolucao
     def my_observer(population, num_generations, num_evaluations, args):
+        '''
         global cur_stop
 
         best = max(population)
@@ -254,7 +255,7 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
         fit_over_gen.append(best.fitness)
         print("gen: %s fit: %s evaluation: %s prop: %s" % (num_generations, best.fitness, num_evaluations, len(population)))
-
+        '''
 
     def my_variator1(random, candidates, args):
         num_offspring = args.setdefault('num_offspring', 1)
@@ -357,10 +358,10 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
                           num_offspring=100,
                           num_elites=75)
 
+    best = max(final_pop)#Isso tem que estar fora do if
+    permute = best.candidate
 
     if display:
-        best = max(final_pop)
-        permute = best.candidate
         print('Fitness: %s' % best.fitness)
         print('Best Distruibuition %s'% permute)
         print('Best Permutation %s'%radixSortPlusMinus(permute))
@@ -397,18 +398,36 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
 if __name__ == '__main__':
     #Caminho usado pelo pc de Fernando
-    #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    file = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
     #Caminho usado pelo pc de Gleidson
-    file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
+    #file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
 
     lobat_problem = False
     is_graphics_on = False
-    fitness, all_fitness, distribuition, permutation, evaluations, generations = \
-        main(display=True, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
+    fitness_history = []
+    permutation_history = []
+    evaluations_history = []
 
-    print(fitness)
-    print(all_fitness)
-    print(distribuition)
-    print(permutation)
-    print(evaluations)
-    print(generations)
+    for i in range(3):  # executa 30 vezes
+        print "Execucao " + str(i+1) + "..."
+        fitness, all_fitness, distribuition, permutation, evaluations, generations = \
+            main(display=False, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
+        '''#Comentar trecho para evitar exebicao de cada resultado durante a execucao de multiplos testes
+
+        print(all_fitness)
+        print(distribuition)
+        print(permutation)
+        print(evaluations)
+        print(generations)
+        '''
+        print("Fitness: "+str(int(fitness))+", Numero de avaliacoes: "+str(evaluations)+", Numero de geracoes: "+str(generations))
+
+
+        fitness_history.append(int(fitness))
+
+
+    plt.hist(fitness_history)
+    plt.title("Fitness History")
+    plt.xlabel("Fitness")
+    plt.ylabel("Frequency")
+    plt.show()
