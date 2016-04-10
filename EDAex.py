@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import copy
 import time
+import numpy as np
+import scipy.stats as stats
 
 #solucao
 #permutacao
@@ -441,7 +443,7 @@ if __name__ == '__main__':
     def desvio_padrao(valores):
         return math.sqrt(variancia(valores))
 
-    for i in range(3):  # executa 30 vezes
+    for i in range(30):  # executa 30 vezes
         print "Execucao " + str(i+1) + "..."
         fitness, all_fitness, distribuition, permutation, evaluations, generations = \
             main(display=False, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
@@ -465,6 +467,7 @@ if __name__ == '__main__':
         generations_history.append(generations)
         exec_time_history.append(exec_time)
 
+
     print("\n\n Fitness:")
     print("Melhor: "+str(min(fitness_history))+", Pior: "+str(max(fitness_history))+", Media: "+str(media(fitness_history))+", Desvio Padrao: "+ str(desvio_padrao(fitness_history)))
 
@@ -474,7 +477,16 @@ if __name__ == '__main__':
     print("\n\n Validacoes:")
     print("Media: " + str(media(evaluations_history)))
 
-    plt.hist(fitness_history)
+    h = sorted(fitness_history)  # sorted
+
+    fit = stats.norm.pdf(h, np.mean(h), np.std(h))  # this is a fitting indeed
+
+    plt.plot(h, fit, '-o')
+
+    plt.hist(h, normed=True)  # use this to draw histogram of your data
+    plt.axvline(x=media(h), linewidth=3, color='red', label="media")
+    plt.legend()
+    plt.grid(True)
     plt.title("Fitness Histogram")
     plt.xlabel("Fitness")
     plt.ylabel("Frequency")
