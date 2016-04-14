@@ -401,7 +401,7 @@ if __name__ == '__main__':
     #Caminho usado pelo pc de Gleidson
     file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
 
-    lobat_problem = False
+    lobat_problem = True
     is_graphics_on = False
     fitness, all_fitness, distribuition, permutation, evaluations, generations = \
         main(display=True, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
