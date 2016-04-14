@@ -5,7 +5,9 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import copy
-
+import time
+import numpy as np
+import scipy.stats as stats
 
 #solucao
 #permutacao
@@ -69,9 +71,10 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
     list_of_best_city = []
     fit_over_gen = []
     is_lobat_problem = make_lobat_problem
-
+    '''#Comentar trecho para evitar criacao de janelas durante a execucao de multiplos testes
     fig = plt.figure()
     ax1 = fig.add_subplot(1,1,1)
+    '''
 
     def radixSortPlusMinus(array):
         positivo = []
@@ -247,6 +250,7 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
     #usar isso aqui para alterar oq eu quero ver de dentro da evolucao
     def my_observer(population, num_generations, num_evaluations, args):
+        '''
         global cur_stop
 
         best = max(population)
@@ -254,7 +258,7 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
         fit_over_gen.append(best.fitness)
         print("gen: %s fit: %s evaluation: %s prop: %s" % (num_generations, best.fitness, num_evaluations, len(population)))
-
+        '''
 
     def my_variator1(random, candidates, args):
         num_offspring = args.setdefault('num_offspring', 1)
@@ -357,10 +361,10 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
                           num_offspring=100,
                           num_elites=75)
 
+    best = max(final_pop)#Isso tem que estar fora do if
+    permute = best.candidate
 
     if display:
-        best = max(final_pop)
-        permute = best.candidate
         print('Fitness: %s' % best.fitness)
         print('Best Distruibuition %s'% permute)
         print('Best Permutation %s'%radixSortPlusMinus(permute))
@@ -397,18 +401,93 @@ def main(prng=None, display=False, file_path=None, make_lobat_problem=False, sho
 
 if __name__ == '__main__':
     #Caminho usado pelo pc de Fernando
-    #file_path = "/Users/Fenando/GitHub/TSP/Eil/eil51.tsp"
+    file = "/Users/Fenando/GitHub/TSP/Eil/alex10.tsp"
     #Caminho usado pelo pc de Gleidson
-    file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
+    #file = "/Users/gmend/Documents/Dev/TSP/Eil/eil51.tsp"
 
     lobat_problem = True
     is_graphics_on = False
-    fitness, all_fitness, distribuition, permutation, evaluations, generations = \
-        main(display=True, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
+    fitness_history = []
+    permutation_history = []
+    evaluations_history = []
+    generations_history = []
+    exec_time_history = []
+    inicial_time = time.time()
 
-    print(fitness)
-    print(all_fitness)
-    print(distribuition)
-    print(permutation)
-    print(evaluations)
-    print(generations)
+
+    def somar(valores):
+        soma = 0
+        for v in valores:
+            soma += v
+        return soma
+
+
+    def media(valores):
+        soma = somar(valores)
+        qtd_elementos = len(valores)
+        media = soma / float(qtd_elementos)
+        return media
+
+
+    def variancia(valores):
+        _media = media(valores)
+        soma = 0
+        _variancia = 0
+
+        for valor in valores:
+            soma += math.pow((valor - _media), 2)
+        _variancia = soma / float(len(valores))
+        return _variancia
+
+
+    def desvio_padrao(valores):
+        return math.sqrt(variancia(valores))
+
+    for i in range(30):  # executa 30 vezes
+        print "Execucao " + str(i+1) + "..."
+        fitness, all_fitness, distribuition, permutation, evaluations, generations = \
+            main(display=False, file_path=file, make_lobat_problem=lobat_problem, show_graphics=is_graphics_on)
+        '''#Comentar trecho para evitar exebicao de cada resultado durante a execucao de multiplos testes
+
+        print(all_fitness)
+        print(distribuition)
+        print(permutation)
+        print(evaluations)
+        print(generations)
+        '''
+
+        exec_time = time.time()-inicial_time
+
+        print("Fitness: "+str(int(fitness))+", Numero de avaliacoes: "+str(evaluations)+", Numero de geracoes: "+str(generations)+", Tempo de execucao: "+str(exec_time))
+
+
+        fitness_history.append(int(fitness))
+        permutation_history.append(permutation)
+        evaluations_history.append(evaluations)
+        generations_history.append(generations)
+        exec_time_history.append(exec_time)
+
+
+    print("\n\n Fitness:")
+    print("Melhor: "+str(min(fitness_history))+", Pior: "+str(max(fitness_history))+", Media: "+str(media(fitness_history))+", Desvio Padrao: "+ str(desvio_padrao(fitness_history)))
+
+    print("\n\n Tempo de execucao:")
+    print("Media: " + str(media(exec_time_history)))
+
+    print("\n\n Validacoes:")
+    print("Media: " + str(media(evaluations_history)))
+
+    h = sorted(fitness_history)  # sorted
+
+    fit = stats.norm.pdf(h, np.mean(h), np.std(h))  # this is a fitting indeed
+
+    plt.plot(h, fit, '-o')
+
+    plt.hist(h, normed=True)  # use this to draw histogram of your data
+    plt.axvline(x=media(h), linewidth=3, color='red', label="media")
+    plt.legend()
+    plt.grid(True)
+    plt.title("Fitness Histogram")
+    plt.xlabel("Fitness")
+    plt.ylabel("Frequency")
+    plt.show()
